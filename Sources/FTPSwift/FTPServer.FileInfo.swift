@@ -9,12 +9,13 @@ import Suite
 
 extension FTPServer {
 	public struct FileInfo: Codable, CustomStringConvertible {
-		let name: String
-		let isDirectory: Bool
-		let size: Int64?
-		let modificationDate: Date?
+		public let path: String
+		public let name: String
+		public let isDirectory: Bool
+		public let size: Int64?
+		public let modificationDate: Date?
 		
-		init?(_ dictionary: NSDictionary) {
+		init?(_ dictionary: NSDictionary, directory: String) {
 			guard let incomingName = dictionary["kCFFTPResourceName"] as? String,
 					let incomingSize = dictionary["kCFFTPResourceSize"] as? Int64 else {
 				return nil
@@ -22,6 +23,7 @@ extension FTPServer {
 
 			let incomingIsDirectory = (dictionary["kCFFTPResourceType"] as? Int) == 4
 
+			path = directory + "/" + incomingName
 			name = incomingName
 			isDirectory = incomingIsDirectory
 			size = incomingIsDirectory ? nil : incomingSize

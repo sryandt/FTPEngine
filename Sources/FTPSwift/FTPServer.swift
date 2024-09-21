@@ -22,6 +22,7 @@ public class FTPServer: NSObject, FTPRequestsManagerDelegate {
 	
 	var localDownloadDestination: URL?
 	var localUploadSource: URL?
+	var requestedDirectoryName = ""
 
 	var downloadProgress: ((Double) -> Void)?
 	var uploadProgress: ((Double) -> Void)?
@@ -33,10 +34,28 @@ public class FTPServer: NSObject, FTPRequestsManagerDelegate {
 		
 		manager.delegate = self
 	}
-		
+
+	public func deleteFile(at path: String) async throws {
+		let _: Void = try await withCheckedThrowingContinuation { continuation in
+			manager.addRequestForDeleteFile(atPath: path)
+			manager.startProcessingRequests()
+			continuation.resume()
+		}
+	}
+
+
+	public func deleteFile(_ file: FileInfo) async throws {
+		let _: Void = try await withCheckedThrowingContinuation { continuation in
+			manager.addRequestForDeleteFile(atPath: file.path)
+			manager.startProcessingRequests()
+			continuation.resume()
+		}
+	}
+
 	public func requestFileList(at path: String) async throws -> [FileInfo] {
 		if listContinuation != nil { throw FTPServerError.busy }
 		
+		requestedDirectoryName = path
 		return try await withCheckedThrowingContinuation { continuation in
 			self.listContinuation = continuation
 			
@@ -76,7 +95,7 @@ public class FTPServer: NSObject, FTPRequestsManagerDelegate {
 	public func requestsManager(_ requestsManager: (any FTPRequestsManagerProtocol)!, didCompleteListingRequest request: (any FTPRequestProtocol)!, listingDetails: [Any]!) {
 		
 		if let dicts = listingDetails as? [NSDictionary] {
-			listContinuation?.resume(returning: dicts.compactMap { FileInfo($0) })
+			listContinuation?.resume(returning: dicts.compactMap { FileInfo($0, directory: requestedDirectoryName) })
 		} else {
 			listContinuation?.resume(throwing: FTPServerError.badListResultError)
 		}
