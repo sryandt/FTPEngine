@@ -109,20 +109,26 @@ public class FTPServer: NSObject, FTPRequestsManagerDelegate {
 	}
 	
 	public func requestsManager(_ requestsManager: (any FTPRequestsManagerProtocol)!, didCompleteDownloadRequest request: (any FTPDataExchangeRequestProtocol)!) {
-		
+		defer {
+			downloadProgress = nil
+		}
+
 		do {
-			guard let localDownloadDestination else { throw FTPServerError.noDestinationURL }
+			guard let localDownloadDestination else {
+				downloadContinuation?.resume(throwing: FTPServerError.noDestinationURL)
+				return
+			}
 			let data = try Data(contentsOf: localDownloadDestination)
 			downloadContinuation?.resume(returning: data)
 		} catch {
 			downloadContinuation?.resume(throwing: error)
 		}
-		downloadProgress = nil
 	}
 	
 	public func requestsManager(_ requestsManager: (any FTPRequestsManagerProtocol)!, didCompleteUploadRequest request: (any FTPDataExchangeRequestProtocol)!) {
 		
 		uploadContinuation?.resume()
+		uploadContinuation = nil
 		uploadProgress = nil
 	}
 
