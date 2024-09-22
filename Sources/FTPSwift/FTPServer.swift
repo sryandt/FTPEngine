@@ -77,6 +77,10 @@ public class FTPServer: NSObject, FTPRequestsManagerDelegate {
 		}
 	}
 	
+	public func requestFile(_ file: FileInfo, progress: ((Double) -> Void)? = nil) async throws -> Data {
+		try await requestFile(at: file.path, progress: progress)
+	}
+	
 	public func uploadFile(_ data: Data, to path: String, progress: ((Double) -> Void)? = nil) async throws {
 		if uploadContinuation != nil { throw FTPServerError.busy }
 		
