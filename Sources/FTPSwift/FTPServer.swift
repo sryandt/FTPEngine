@@ -120,6 +120,7 @@ public class FTPServer: NSObject, FTPRequestsManagerDelegate {
 		do {
 			guard let localDownloadDestination else {
 				downloadContinuation?.resume(throwing: FTPServerError.noDestinationURL)
+				downloadContinuation = nil
 				return
 			}
 			let data = try Data(contentsOf: localDownloadDestination)
@@ -127,6 +128,7 @@ public class FTPServer: NSObject, FTPRequestsManagerDelegate {
 		} catch {
 			downloadContinuation?.resume(throwing: error)
 		}
+		downloadContinuation = nil
 	}
 	
 	public func requestsManager(_ requestsManager: (any FTPRequestsManagerProtocol)!, didCompleteUploadRequest request: (any FTPDataExchangeRequestProtocol)!) {
