@@ -19,7 +19,7 @@ public class FTPServer: NSObject, FTPRequestsManagerDelegate {
 	var listContinuation: CheckedContinuation<[FileInfo], Error>?
 	var downloadContinuation: CheckedContinuation<Data, Error>?
 	var uploadContinuation: CheckedContinuation<Void, Error>?
-	
+
 	var localDownloadDestination: URL?
 	var localUploadSource: URL?
 	var requestedDirectoryName = ""
@@ -47,6 +47,14 @@ public class FTPServer: NSObject, FTPRequestsManagerDelegate {
 	public func deleteFile(_ file: FileInfo) async throws {
 		let _: Void = try await withCheckedThrowingContinuation { continuation in
 			manager.addRequestForDeleteFile(atPath: file.path)
+			manager.startProcessingRequests()
+			continuation.resume()
+		}
+	}
+
+	public func createDirectory(at path: String) async throws {
+		let _: Void = try await withCheckedThrowingContinuation { continuation in
+			manager.addRequestForCreateDirectory(atPath: path)
 			manager.startProcessingRequests()
 			continuation.resume()
 		}
