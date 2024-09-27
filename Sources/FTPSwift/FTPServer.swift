@@ -26,6 +26,8 @@ public class FTPServer: NSObject, FTPRequestsManagerDelegate {
 
 	var downloadProgress: ((Double) -> Void)?
 	var uploadProgress: ((Double) -> Void)?
+	
+	public var allowFileOverwrites = true
 
 	public init?(host: String, user: String, password: String) {
 		guard let mgr = FTPRequestsManager(hostname: host, user: user, password: password) else { return nil }
@@ -148,6 +150,10 @@ public class FTPServer: NSObject, FTPRequestsManagerDelegate {
 
 	public func requestsManager(_ requestsManager: (any FTPRequestsManagerProtocol)!, didFailRequest request: (any FTPRequestProtocol)!, withError error: (any Error)!) {
 		
+		print("Reported FTP error: \(error.localizedDescription)")
+		let ns = error as NSError
+		print("Error Details: \(ns.userInfo)")
+		
 		if let listContinuation {
 			listContinuation.resume(throwing: error)
 			self.listContinuation = nil
@@ -165,5 +171,24 @@ public class FTPServer: NSObject, FTPRequestsManagerDelegate {
 			uploadProgress = nil
 		}
 	}
+	
 }
 
+extension FTPServer: FTPRequestDelegate {
+	public func requestCompleted(_ request: (any FTPRequestProtocol)!) {
+		
+	}
+	
+	public func requestFailed(_ request: (any FTPRequestProtocol)!) {
+		print("FTP Request failed: \(request.description)")
+	}
+	
+	public func shouldOverwriteFile(_ filePath: String!, forRequest request: (any FTPDataExchangeRequestProtocol)!) -> Bool {
+		allowFileOverwrites
+	}
+	
+	public func percentCompleted(_ percent: Float, forRequest request: (any FTPRequestProtocol)!) {
+		if request is FTPDownloadRequest { downloadProgress?(Double(percent)) }
+		if request is FTPUploadRequest { uploadProgress?(Double(percent)) }
+	}
+}

@@ -215,7 +215,7 @@
 - (void)requestFailed:(FTPRequest *)request
 {
     if ([self.delegate respondsToSelector:@selector(requestsManager:didFailRequest:withError:)]) {
-        NSError *error = [NSError errorWithDomain:@"com.albertodebortoli.goldraccoon" code:-1000 userInfo:@{@"message": request.error.message}];
+        NSError *error = [NSError errorWithDomain:@"com.detectiontek.ftpengine" code:-1000 userInfo:@{@"message": request.error.message}];
         [self.delegate requestsManager:self didFailRequest:request withError:error];
     }
     

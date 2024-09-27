@@ -24,7 +24,7 @@
         _timeout = 30;
         _cancelRequestFlag = NO;
         _cancelDoesNotCallDelegate = NO;
-        _queue = dispatch_queue_create("com.albertodebortoli.goldraccoon.streaminfo", DISPATCH_QUEUE_CONCURRENT);
+        _queue = dispatch_queue_create("com.detectiontek.ftpengine.streaminfo", DISPATCH_QUEUE_CONCURRENT);
     }
     
     return self;
